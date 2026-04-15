@@ -50,7 +50,7 @@ def main():
     agent = DQNAgent(state_shape=(20, 10), num_actions=5, device=device)
 
     # 2. SIÊU THAM SỐ HUẤN LUYỆN
-    EPISODES = 20        # Số ván game tối đa AI sẽ chơi
+    EPISODES = 2000        # Số ván game tối đa AI sẽ chơi
     MAX_STEPS = 5000         # Giới hạn số bước mỗi ván (chống AI chơi kẹt vào vòng lặp vô hạn)
     TARGET_UPDATE_FREQ = 10  # Cập nhật Target Network sau mỗi 10 episodes
 
