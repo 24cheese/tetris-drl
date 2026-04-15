@@ -1,0 +1,48 @@
+# =========================================
+# PYTHON & VIRTUAL ENVIRONMENT
+# =========================================
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# =========================================
+# MACHINE LEARNING & OUTPUTS
+# =========================================
+# Bỏ qua các file tạ (model weights) vì dung lượng lớn
+*.pth
+*.pt
+*.h5
+weights/**/*.pth
+
+# Bỏ qua log chạy thí nghiệm (chỉ giữ lại config)
+backend/experiments/results/*
+!backend/experiments/results/.gitkeep
+
+# =========================================
+# JUPYTER NOTEBOOK
+# =========================================
+.ipynb_checkpoints/
+
+# =========================================
+# FRONTEND (NODE.JS / REACT)
+# =========================================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================================
+# OS, EDITOR & SECRETS
+# =========================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.env
+.env.local
