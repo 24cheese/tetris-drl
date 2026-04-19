@@ -1,99 +1,75 @@
 # 🧱 Tetris Deep Reinforcement Learning (DRL)
 
-Một dự án ứng dụng Trí tuệ Nhân tạo (Deep Reinforcement Learning) để giải quyết trò chơi Tetris. Hệ thống được thiết kế theo kiến trúc MLOps chuẩn mực, bao gồm Custom Environment (Gymnasium), quản lý thử nghiệm thuật toán (DQN, PPO), và hệ thống giả lập trực quan qua Web Frontend.
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C?logo=pytorch)](https://pytorch.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
+
+Một hệ thống ứng dụng **Deep Reinforcement Learning** để giải quyết trò chơi Tetris một cách tối ưu. Dự án bao gồm môi trường mô phỏng tùy chỉnh theo chuẩn Gymnasium, các thuật toán học máy tiên tiến (DQN, PPO).
 
 ---
 
-## 🏗 Kiến trúc Hệ thống (Directory Tree)
+## 🌟 Tính năng nổi bật
 
-Dự án được phân tách thành các module độc lập, quản lý cấu hình tập trung và hỗ trợ khả năng tái tạo thí nghiệm (reproducibility) cao.
+- **AI Agents Đa dạng**: Hỗ trợ thuật toán DQN (Deep Q-Network), PPO (Proximal Policy Optimization) và Heuristic Baseline.
+- **Custom Environment**: Môi trường Tetris được xây dựng trên chuẩn `gymnasium` với hiệu năng cao.
+- **Hệ thống Quản lý Weights**: Tách biệt file trọng số (Artifacts) giúp quản lý mô hình dễ dàng.
+- **Phân tích Chuyên sâu**: Bộ Notebook đi kèm để khảo sát hàm Reward và đặc trưng (Features).
+
+---
+
+## 📂 Kiến trúc Dự án (Detailed)
+
+Dự án được phân tách thành các module độc lập, hỗ trợ khả năng tái tạo thí nghiệm cao.
 
 ```text
-tetrisdrl/
+TetrisDRL/
 │
-├── backend/                            # Toàn bộ logic Game, AI và API nằm ở đây
-│   │
-│   ├── api/                            # Chứa mã nguồn server (FastAPI/Flask)
-│   │   ├── app.py                      # File khởi chạy server API
-│   │   └── routes.py                   # Các endpoint (ví dụ: /start, /next-step)
-│   │
+├── backend/                            # Toàn bộ logic Game, AI và API
+│   ├── api/                            # Chứa mã nguồn server (FastAPI)
+│   │   ├── app.py                      # File khởi chạy server chính
 │   ├── env/                            # Môi trường Gymnasium (Decoupled)
-│   │   ├── __init__.py
-│   │   └── tetris_env.py               # Class TetrisEnv (step, reset, render)
-│   │
+│   │   ├── tetris_engine.py            # Logic lõi của trò chơi Tetris
+│   │   └── tetris_env.py               # Class TetrisEnv chuẩn Gymnasium
 │   ├── models/                         # Cấu trúc mạng Nơ-ron (PyTorch)
 │   │   ├── dqn_net.py                  # Mạng MLP cho DQN
 │   │   └── actor_critic_net.py         # Mạng Actor-Critic cho PPO
-│   │
 │   ├── agents/                         # Các thuật toán DRL
-│   │   ├── base_agent.py               # Abstract base class (interface chung)
-│   │   ├── heuristic_agent.py          # Rule-based (Pierre Dellacherie / Baseline)
-│   │   ├── dqn_agent.py                # DQN: Replay Buffer, Epsilon-Greedy, Update
-│   │   └── ppo_agent.py                # PPO: Policy Gradient, GAE, Clip objective
-│   │
+│   │   ├── dqn_agent.py                # DQN: Replay Buffer, Epsilon-Greedy
+│   │   └── ppo_agent.py                # PPO: Policy Gradient, GAE
 │   ├── utils/                          # Các module hỗ trợ dùng chung
-│   │   ├── state_extractor.py          # Tính 6 features (Holes, Bumpiness, Height...)
-│   │   ├── replay_buffer.py            # Experience Replay Buffer (cho DQN)
-│   │   └── logger.py                   # Ghi metrics ra TensorBoard / CSV
-│   │
+│   │   └── state_extractor.py          # Tính 4-6 features (Holes, Bumpiness...)
 │   ├── experiments/                    # Quản lý thí nghiệm (Reproducibility)
 │   │   ├── configs/                    # File cấu hình hyperparameter (YAML)
-│   │   │   ├── dqn_config.yaml         # Hyperparams: lr, gamma, batch_size, epsilon...
-│   │   │   ├── ppo_config.yaml         # Hyperparams: lr, clip_eps, n_steps, epochs...
-│   │   │   └── heuristic_config.yaml   # Trọng số heuristic features
-│   │   │
-│   │   └── results/                    # Kết quả raw từ mỗi lần chạy
-│   │       ├── dqn_run_001/            # Log, CSV, checkpoint của run 001
-│   │       ├── dqn_run_002/
-│   │       └── ppo_run_001/
-│   │
-│   ├── train.py                        # Script huấn luyện (đọc config từ experiments/)
-│   ├── evaluate.py                     # Script đánh giá, in ra điểm số trung bình
-│   └── requirements.txt                # Thư viện Python (gymnasium, torch, fastapi...)
+│   │   │   └── dqn_config.yaml         # Hyperparams: lr, gamma, batch_size...
+│   │   └── results/                    # Log và kết quả training raw
+│   ├── train.py                        # Script huấn luyện chính
+│   ├── evaluate.py                     # Script đánh giá model
+│   └── requirements.txt                # Thư viện Python cần thiết
 │
-├── frontend/                           # Giao diện người dùng (React + Tailwind CSS)
-│   ├── public/
-│   └── src/
-│       ├── components/                 # Các thành phần UI có thể tái sử dụng
-│       │   ├── Board.jsx               # Component render lưới Tetris 20x10
-│       │   ├── ControlPanel.jsx        # Cụm nút Play/Pause, chọn model (DQN/PPO)
-│       │   └── AnalyticsView.jsx       # Hiển thị Q-value, số lỗ hổng real-time
-│       │
-│       ├── hooks/
-│       │   └── useGameState.js         # Custom hook quản lý trạng thái từ API
-│       │
-│       ├── services/
-│       │   └── apiClient.js            # Cấu hình Axios/Fetch để gọi Backend
-│       │
-│       ├── App.jsx                     # Layout chính của ứng dụng
-│       └── index.css                   # Import Tailwind layers
-│       │
+├── frontend/                           # Giao diện người dùng (React + Tailwind)
+│   ├── src/
+│   │   ├── components/                 # Các thành phần UI (Board, Stats Card...)
+│   │   ├── App.jsx                     # Layout và logic chính
+│   │   └── index.css                   
 │   ├── package.json
-│   └── tailwind.config.js
+│   └── vite.config.js
 │
-├── notebooks/                          # Jupyter Notebooks phân tích & trực quan
-│   ├── 01_env_exploration.ipynb        # Kiểm tra môi trường, thống kê reward
-│   ├── 02_reward_analysis.ipynb        # Phân tích và tinh chỉnh hàm Reward
-│   ├── 03_feature_analysis.ipynb       # Khảo sát 6 features (tương quan, phân phối)
-│   └── 04_comparison.ipynb             # So sánh hiệu năng: Heuristic vs DQN vs PPO
+├── weights/                            # File model (.pth) - Project Artifacts
+│   ├── dqn/                            # Trọng số cho thuật toán DQN
+│   └── ppo/                            # Trọng số cho thuật toán PPO
 │
-├── tests/                              # Unit test & Smoke test
-│   ├── test_env.py                     # Kiểm tra step(), reset(), render()
-│   ├── test_state_extractor.py         # Kiểm tra tính đúng đắn của 6 features
-│   └── test_agents.py                  # Smoke test: agents có chạy không bị crash
+├── notebooks/                          # Jupyter Notebooks phân tích
+│   ├── 01_env_exploration.ipynb        # Kiểm tra môi trường & hành động
+│   ├── 02_reward_analysis.ipynb        # Tinh chỉnh hàm Reward
+│   └── 03_feature_analysis.ipynb       # Khảo sát đặc trưng trạng thái
 │
-├── weights/                            # File model đã train (.pth), phân theo agent
-│   ├── dqn/
-│   │   ├── dqn_v1_best.pth
-│   │   └── dqn_v2_best.pth
-│   └── ppo/
-│       └── ppo_v1_best.pth
+├── tests/                              # Unit test cho hệ thống
+│   └── test_env.py                     # Kiểm tra logic môi trường
 │
-├── docs/                               # Tài liệu học thuật của dự án
-│   ├── architecture_design.md          # Thiết kế tổng thể hệ thống
-│   ├── reward_function.md              # Công thức và lý luận thiết kế hàm Reward
-│   ├── state_representation.md         # Mô tả chi tiết 6 features đặc trưng
-│   └── results/                        # Biểu đồ & bảng kết quả cuối cùng (xuất hình)
+├── docs/                               # Tài liệu học thuật & thiết kế
+│   ├── architecture_design.md          # Thiết kế tổng thể
+│   └── reward_function.md              # Lý luận thiết kế hàm Reward
 │
 ├── scripts/                            # Script tự động hoá (chạy nhanh trên terminal)
 │   ├── run_train_dqn.bat               # Chạy training DQN với config mặc định
@@ -102,27 +78,62 @@ tetrisdrl/
 │   └── run_compare.bat                 # So sánh kết quả các agents
 │
 ├── .gitignore
-└── README.md                           # Hướng dẫn setup, chạy backend/frontend/train
+└── README.md                           # Hướng dẫn này
+```
 
-## 🚀 Cài đặt & Khởi chạy (Local)
+---
 
-### 1. Yêu cầu hệ thống
-- Python 3.9+
-- Node.js 18+ (Dành cho Frontend)
-- Khuyến nghị sử dụng GPU (CUDA) để huấn luyện nhanh hơn.
+## 🚀 Hướng dẫn Cài đặt & Khởi chạy
 
-### 2. Thiết lập Môi trường Backend (Python)
+### 1. Backend (Python)
+Đảm bảo bạn đã cài đặt Python 3.9+.
+
 ```bash
-# Clone dự án
-git clone [https://github.com/your-username/TetrisDRL.git](https://github.com/your-username/TetrisDRL.git)
-cd TetrisDRL
-
-# Tạo và kích hoạt môi trường ảo
+# Tạo môi trường ảo
 python -m venv .venv
-# Trên Windows:
-.venv\Scripts\activate
-# Trên macOS/Linux:
-source .venv/bin/activate
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate   # Windows
 
 # Cài đặt thư viện
 pip install -r backend/requirements.txt
+```
+
+**Huấn luyện AI:**
+```bash
+python backend/train.py
+```
+
+**Chạy API Server:**
+```bash
+python backend/api/app.py
+```
+
+### 2. Frontend (React)
+Yêu cầu Node.js 18+.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## 🧠 Đặc trưng & Hàm Thưởng (DRL Design)
+
+Hệ thống sử dụng các đặc trưng cốt lõi để biểu diễn trạng thái:
+- **Lines Cleared**: Số hàng vừa biến mất.
+- **Holes**: Số lượng lỗ hổng bị kẹt dưới các khối gạch.
+- **Bumpiness**: Độ gồ ghề của bề mặt gạch.
+- **Height**: Tổng chiều cao của các cột gạch.
+
+---
+
+## 🎨 Giao diện Người dùng
+
+Giao diện được xây dựng dựa trên triết lý thiết kế của **Notion**:
+- **Minimalism**: Sử dụng tông màu trắng và xám ấm (`#f6f5f4`) làm chủ đạo.
+- **Whisper Borders**: Đường viền `1px solid rgba(0,0,0,0.1)` tinh tế.
+- **Real-time Monitoring**: Giám sát Reward, Holes và Action trực quan bằng Lucide Icons.
+
+---

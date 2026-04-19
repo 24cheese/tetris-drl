@@ -1,1 +1,49 @@
 @import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --notion-black: rgba(0, 0, 0, 0.95);
+  --notion-blue: #0075de;
+  --notion-blue-hover: #005bab;
+  --warm-white: #f6f5f4;
+  --warm-dark: #31302e;
+  --warm-gray-500: #615d59;
+  --warm-gray-300: #a39e98;
+  --whisper-border: 1px solid rgba(0, 0, 0, 0.1);
+  --card-shadow: rgba(0, 0, 0, 0.04) 0px 4px 18px, 
+                 rgba(0, 0, 0, 0.027) 0px 2.025px 7.84688px, 
+                 rgba(0, 0, 0, 0.02) 0px 0.8px 2.925px, 
+                 rgba(0, 0, 0, 0.01) 0px 0.175px 1.04062px;
+}
+
+body {
+  margin: 0;
+  background-color: #ffffff;
+  color: var(--notion-black);
+  font-family: 'Inter', -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Notion-like classes */
+.notion-border {
+  border: var(--whisper-border);
+}
+
+.notion-shadow {
+  box-shadow: var(--card-shadow);
+}
+
+.notion-heading {
+  letter-spacing: -0.02em; /* Approximation of Notion's compression */
+  font-weight: 700;
+  color: var(--notion-black);
+}
+
+@keyframes pulse-red {
+  0%, 100% { border-color: rgba(239, 68, 68, 0.2); }
+  50% { border-color: rgba(239, 68, 68, 1); }
+}
+
+.game-over-pulse {
+  animation: pulse-red 2s infinite;
+}

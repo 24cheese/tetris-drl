@@ -1,0 +1,21 @@
+# Core Machine Learning
+torch
+torchvision
+torchaudio
+numpy
+
+# Reinforcement Learning
+gymnasium
+pygame
+
+# Web API
+fastapi
+uvicorn[standard]
+pydantic
+
+# Utilities & Visualization
+PyYAML
+matplotlib
+tensorboard
+pathlib
+python-multipart

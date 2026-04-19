@@ -1,0 +1,24 @@
+# Cấu hình Môi trường (Environment)
+env:
+  width: 10
+  height: 20
+
+# Cấu hình Mạng Nơ-ron & Tác tử (Agent)
+agent:
+  learning_rate: 0.001          # Tốc độ học (Nếu AI học quá chậm, tăng lên 0.002. Nếu điểm bị trồi sụt bất thường, giảm xuống 0.0005)
+  gamma: 0.99                   # Hệ số chiết khấu tương lai (rất quan trọng trong Tetris vì AI phải nhìn xa)
+  replay_memory_size: 30000     # Sức chứa của não bộ (Lưu được 30,000 bước đi)
+  batch_size: 512               # Kích thước mỗi mẻ học (Tăng lên 1024 nếu Colab RAM lớn để học mượt hơn)
+
+# Cấu hình Khám phá (Exploration - Epsilon)
+exploration:
+  initial_epsilon: 1.0          # 100% đi mò mẫm lúc đầu
+  final_epsilon: 0.001          # Giảm dần xuống còn 0.1% mò mẫm ở cuối
+  num_decay_epochs: 2000        # Số episode cần thiết để epsilon giảm từ 1.0 xuống 0.001
+
+# Cấu hình Huấn luyện (Training)
+training:
+  num_epochs: 3000              # Tổng số ván (episodes) sẽ train
+  save_interval: 500            # Cứ sau 500 ván sẽ lưu model 1 lần
+  log_path: "backend/tensorboard" # Nơi lưu log để vẽ biểu đồ
+  saved_path: "weights/dqn"     # Nơi lưu file .pth (tương đối so với project root)

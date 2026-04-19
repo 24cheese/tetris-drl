@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Board from './components/Board';
+import { Play, Pause, SkipForward, RotateCcw, Box, Activity, Trophy, Info } from 'lucide-react';
 
 function App() {
   const [gameState, setGameState] = useState({
@@ -7,22 +8,22 @@ function App() {
     status: 'loading',
     info: { holes: 0, bumpiness: 0 }
   });
-  
-  // Các state mới cho việc điều khiển và hiển thị
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [lastAction, setLastAction] = useState('-');
   const [totalReward, setTotalReward] = useState(0);
 
-  // 1. Lấy trạng thái khởi đầu
+  const intervalRef = useRef(null);
+
   const fetchGameStart = async () => {
     try {
-      setIsPlaying(false); // Dừng auto-play nếu đang chạy
+      setIsPlaying(false);
       setLastAction('-');
       setTotalReward(0);
-      
+
       const response = await fetch('http://127.0.0.1:8000/api/start');
       const data = await response.json();
-      
+
       setGameState({
         board: data.board,
         status: data.status,
@@ -33,14 +34,11 @@ function App() {
     }
   };
 
-  // Chạy 1 lần khi load trang
   useEffect(() => {
     fetchGameStart();
   }, []);
 
-  // 2. Hàm gọi AI đi 1 bước
   const fetchNextStep = async () => {
-    // Nếu game over thì không gọi nữa và tắt chế độ auto-play
     if (gameState.status === 'game_over') {
       setIsPlaying(false);
       return;
@@ -51,131 +49,172 @@ function App() {
         method: 'POST'
       });
       const data = await response.json();
-      
+
       setGameState({
         board: data.board,
         status: data.status,
         info: data.info
       });
-      
+
       if (data.action) setLastAction(data.action);
       if (data.reward) setTotalReward(prev => prev + data.reward);
-      
-      if (data.status === 'game_over') {
-        setIsPlaying(false);
-      }
-      
+      if (data.status === 'game_over') setIsPlaying(false);
+
     } catch (error) {
       console.error("Lỗi khi gọi next-step:", error);
       setIsPlaying(false);
     }
   };
 
-  // 3. Vòng lặp Auto-Play sử dụng useEffect
   useEffect(() => {
-    let intervalId;
     if (isPlaying && gameState.status !== 'game_over') {
-      // Cứ mỗi 200ms (0.2s) sẽ tự động gọi fetchNextStep 1 lần
-      intervalId = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         fetchNextStep();
-      }, 200); 
+      }, 100);
+    } else {
+      clearInterval(intervalRef.current);
     }
-    
-    // Dọn dẹp interval khi component unmount hoặc isPlaying thay đổi
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
+    return () => clearInterval(intervalRef.current);
   }, [isPlaying, gameState.status]);
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center font-sans text-gray-100">
-      <div className="flex flex-col md:flex-row gap-8 items-start">
-        
-        {/* Cột trái: Bàn cờ */}
-        <div>
-          <h1 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-            Tetris DRL Agent
-          </h1>
-          <Board boardMatrix={gameState.board} />
-          
-          {/* Thông báo Game Over */}
-          {gameState.status === 'game_over' && (
-            <div className="mt-4 p-3 bg-red-900/50 border border-red-500 text-red-200 text-center rounded-lg animate-pulse">
-              GAME OVER! AI đã chạm nóc.
+    <div className="min-h-screen w-full overflow-auto bg-[#ffffff] flex flex-col items-center font-sans text-[rgba(0,0,0,0.95)] p-4 sm:p-8">
+      <div className="max-w-5xl w-full flex items-center justify-between mb-8 pt-4 ">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-[rgba(0,0,0,0.95)] rounded-lg flex items-center justify-center text-white shadow-sm">
+            <Box size={24} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight leading-none mb-1">Tetris AI</h1>
+            <p className="text-[12px] text-[#615d59] font-medium uppercase tracking-wider">Deep Reinforcement Learning</p>
+          </div>
+        </div>
+        <div className="hidden sm:flex gap-6">
+          <a href="#" className="flex items-center gap-2 text-[14px] font-medium text-[rgba(0,0,0,0.6)] hover:text-[#0075de] transition-colors">
+            Docs
+          </a>
+          <a href="https://github.com/24cheese/tetris-drl" className="flex items-center gap-2 text-[14px] font-medium text-[rgba(0,0,0,0.6)] hover:text-[#0075de] transition-colors">
+            GitHub
+          </a>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row items-start justify-center gap-12 max-w-5xl w-full">
+
+        {/* LEFT COLUMN */}
+        <div className="flex flex-col items-center w-full lg:w-auto">
+          <div className="mb-10 text-center lg:text-left w-full">
+            <h2 className="text-[36px] font-bold tracking-[-0.03em] leading-tight mb-3">Agent Training View</h2>
+            <p className="text-[#615d59] text-[16px] max-w-md leading-relaxed">
+              Observe how the neural network perceives and reacts to the game state in real-time.
+            </p>
+          </div>
+
+          <div className="relative">
+            {gameState.status === 'game_over' && (
+              <div className="absolute -inset-3 border-2 border-[#eb5757] rounded-2xl z-20 game-over-pulse pointer-events-none"></div>
+            )}
+
+            <div className="bg-white notion-shadow rounded-2xl p-1 notion-border">
+              <Board boardMatrix={gameState.board} />
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Cột phải: Bảng điều khiển */}
-        <div className="w-72 bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl">
-          <h2 className="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Thông số AI</h2>
-          
-          <div className="space-y-4 mb-8">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-400 text-sm">Trạng thái:</span>
-              <span className={`font-mono font-bold ${gameState.status === 'playing' || gameState.status === 'started' ? 'text-green-400' : 'text-red-400'}`}>
-                {gameState.status}
-              </span>
-            </div>
-            
-            <div className="flex justify-between items-center">
-              <span className="text-gray-400 text-sm">Hành động vừa chọn:</span>
-              <span className="font-mono text-cyan-400 bg-gray-800 px-2 py-1 rounded">{lastAction}</span>
+        {/* RIGHT COLUMN */}
+        <div className="flex flex-col w-full lg:w-[400px] gap-8">
+
+          {/* Main Stats Card */}
+          <div className="bg-white notion-border rounded-2xl p-7 notion-shadow relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5">
+              <Activity size={80} />
             </div>
 
-            <div className="flex justify-between items-center">
-              <span className="text-gray-400 text-sm">Tổng Reward:</span>
-              <span className="font-mono text-yellow-400">{totalReward.toFixed(1)}</span>
+            <div className="flex items-center justify-between mb-10 border-b border-[rgba(0,0,0,0.05)] pb-5">
+              <div className="flex flex-col">
+                <span className="text-[11px] font-black text-[rgba(0,0,0,0.4)] uppercase tracking-[0.15em] mb-1">Status</span>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${gameState.status === 'playing' ? 'bg-[#1aae39] animate-pulse' : 'bg-[#eb5757]'}`}></div>
+                  <span className="text-[14px] font-bold capitalize">{gameState.status.replace('_', ' ')}</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-[11px] font-black text-[rgba(0,0,0,0.4)] uppercase tracking-[0.15em] mb-1">Engine</span>
+                <span className="text-[13px] font-bold text-[#615d59]">DQN v1.0</span>
+              </div>
             </div>
-            
-            <div className="h-px bg-gray-800 my-2"></div>
 
-            <div className="flex justify-between items-center">
-              <span className="text-gray-400 text-sm">Lỗ hổng (Holes):</span>
-              <span className="font-mono text-xl">{gameState.info.holes}</span>
-            </div>
+            <div className="space-y-10">
+              <div className="group">
+                <span className="text-[12px] font-bold text-[#615d59] uppercase tracking-wider block mb-3 group-hover:text-[#0075de] transition-colors">Neural Output</span>
+                <div className="bg-[#f6f5f4] p-4 rounded-xl font-mono text-[15px] font-bold text-[rgba(0,0,0,0.8)] border border-[rgba(0,0,0,0.05)] shadow-sm flex items-center gap-3">
+                  <span className="text-[#0075de] font-black">▶</span> {lastAction}
+                </div>
+              </div>
 
-            <div className="flex justify-between items-center">
-              <span className="text-gray-400 text-sm">Mấp mô (Bumpiness):</span>
-              <span className="font-mono text-xl">{gameState.info.bumpiness}</span>
+              <div className="grid grid-cols-2 gap-8">
+                <div className="p-1">
+                  <span className="text-[12px] font-bold text-[#615d59] uppercase tracking-wider block mb-2">Holes</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[32px] font-black tracking-tight">{gameState.info.holes}</span>
+                    <span className="text-[12px] text-[#a39e98] font-medium">units</span>
+                  </div>
+                </div>
+                <div className="p-1">
+                  <span className="text-[12px] font-bold text-[#615d59] uppercase tracking-wider block mb-2">Bumpiness</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[32px] font-black tracking-tight">{gameState.info.bumpiness}</span>
+                    <span className="text-[12px] text-[#a39e98] font-medium">val</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-[rgba(0,0,0,0.05)]">
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy size={16} className="text-[#0075de]" />
+                  <span className="text-[12px] font-bold text-[#615d59] uppercase tracking-wider">Accumulated Reward</span>
+                </div>
+                <div className="text-[48px] font-black tracking-[-0.05em] text-[#0075de] leading-none">
+                  {totalReward.toFixed(1)}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Cụm nút điều khiển */}
-          <div className="space-y-3">
-            <div className="flex gap-2">
-              <button 
+          {/* Action Controls */}
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-3">
+              <button
                 onClick={() => setIsPlaying(!isPlaying)}
                 disabled={gameState.status === 'game_over'}
-                className={`flex-1 py-2 font-bold rounded-lg transition-colors ${
-                  isPlaying 
-                    ? 'bg-red-600 hover:bg-red-700 text-white' 
-                    : 'bg-green-600 hover:bg-green-700 text-white disabled:opacity-50'
-                }`}
+                className={`flex-[3] py-4 px-6 font-bold rounded-xl transition-all text-[15px] flex items-center justify-center gap-3 shadow-md hover:shadow-lg active:scale-[0.98] ${isPlaying
+                    ? 'bg-white text-[rgba(0,0,0,0.8)] border border-[rgba(0,0,0,0.15)] hover:bg-[#f6f5f4]'
+                    : 'bg-[#0075de] text-white border-transparent hover:bg-[#005bab] disabled:opacity-30'
+                  }`}
               >
-                {isPlaying ? '⏸ Tạm dừng' : '▶ Tự động chơi'}
+                {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                {isPlaying ? 'PAUSE AGENT' : 'START AUTO PLAY'}
               </button>
-              
-              <button 
+
+              <button
                 onClick={fetchNextStep}
                 disabled={isPlaying || gameState.status === 'game_over'}
-                className="px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50 transition-colors"
-                title="Đi từng bước"
+                className="flex-1 bg-white border border-[rgba(0,0,0,0.15)] hover:bg-[#f6f5f4] text-[rgba(0,0,0,0.8)] rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98] flex items-center justify-center disabled:opacity-30"
+                title="Next Step"
               >
-                ⏭
+                <SkipForward size={22} fill="currentColor" />
               </button>
             </div>
 
-            <button 
+            <button
               onClick={fetchGameStart}
-              className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg border border-gray-600 transition-colors"
+              className="w-full py-4 bg-transparent hover:bg-[rgba(0,0,0,0.03)] text-[#a39e98] hover:text-[rgba(0,0,0,0.7)] rounded-xl transition-all font-bold text-[13px] tracking-widest flex items-center justify-center gap-2 uppercase"
             >
-              🔄 Reset Game
+              <RotateCcw size={14} /> Reset Training Environment
             </button>
           </div>
-          
-        </div>
 
+        </div>
       </div>
     </div>
   );
