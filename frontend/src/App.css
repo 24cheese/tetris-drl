@@ -1,9 +1,0 @@
-/* Custom animations and global overrides */
-@keyframes glow {
-  0%, 100% { opacity: 0.5; filter: blur(20px); }
-  50% { opacity: 0.8; filter: blur(30px); }
-}
-
-.bg-glow {
-  animation: glow 4s ease-in-out infinite;
-}

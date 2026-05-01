@@ -102,7 +102,7 @@ class TetrisEngine:
                 if shape[i, j] !=0:
                     if self.current_piece.y + i >= 0:
                         self.board[self.current_piece.y + i, self.current_piece.x + j] = shape[i, j] 
-                        
+
     def _clear_lines(self):
         """Xóa dòng và trả về số dòng ăn được"""
         full_lines = np.all(self.board != 0, axis=1)
@@ -112,7 +112,7 @@ class TetrisEngine:
             self.board = self.board[~full_lines]
             empty_rows = np.zeros((num_lines_cleared, self.width), dtype=np.int8)
             self.board = np.vstack((empty_rows, self.board))
-            
+
         self._spawn_piece()
         return num_lines_cleared
 

@@ -1,0 +1,25 @@
+# Network
+learning_rate: 0.001
+
+# RL core
+gamma: 0.99
+
+# Replay Buffer
+replay_capacity: 30000
+batch_size: 512
+
+# Exploration (ε-greedy)
+epsilon_start: 1.0
+epsilon_end: 0.001
+num_decay_epochs: 2000
+
+# Target Network
+target_update_freq: 10        # episodes
+
+# Training
+num_episodes: 3000
+save_interval: 500
+saved_path: "weights/colab"
+
+# Reward Function: "game_score" | "heuristic"
+reward_type: "game_score"
