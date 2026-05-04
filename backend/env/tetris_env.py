@@ -39,6 +39,7 @@ class TetrisEnv(gym.Env):
         lines_cleared = self.engine._clear_lines()
 
         stats  = self._get_heuristic_stats()
+        stats['lines_cleared'] = lines_cleared          # ← fix: expose cho info
         reward = self._calculate_reward(lines_cleared, stats)
         self.engine.game_over = self.engine._check_game_over()
 
@@ -86,10 +87,10 @@ class TetrisEnv(gym.Env):
             if self.engine.game_over:
                 reward -= 2.0
         else:
-            # Game Score: 1 + lines²×10 − 2·gameover
-            reward = (lines_cleared ** 2) * 10
+            # Game Score (v6): 1 + lines²×10 − 2·gameover
+            reward = 1 + (lines_cleared ** 2) * 10
             if self.engine.game_over:
-                reward -= 5.0
+                reward -= 2.0
         return float(reward)
 
     def _heuristic_f(self, lines, stats):
